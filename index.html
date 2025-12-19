@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TXT EDIT Pro - أداة تحرير نصوص متطورة من تطوير Mahmoud AboElfadl.">
+    <meta name="author" content="Mahmoud AboElfadl">
+    <meta name="theme-color" content="#4f46e5">
+    
     
     <title>TXT EDIT _ تحرير اللنص </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -39,7 +43,7 @@
     <meta name="author" content="Mahmoud_AboElfadl">
     <meta name="robots" content="index, follow" />
     <link rel="icon" href="https://editor-txt.netlify.app/txt.png" type="image/jpeg">
-    <meta name="theme-color" content="#FFD500" />
+    
     <meta name="mobile-web-app-capable" content="yes" />
     <script type="application/ld+json">{
       "@context": "https://schema.org",
@@ -68,385 +72,532 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-
     
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f3f4f6;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Editor Styles */
+        #richEditor {
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            outline: none;
+            min-height: 100%;
         }
-        /* Scrollbar customization */
-        textarea::-webkit-scrollbar {
-            width: 10px;
+        
+        /* تنسيق النصوص المميزة (Highlight) */
+        mark {
+            background-color: #ffff00 !important;
+            color: #000 !important;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid #eab308;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
         }
-        textarea::-webkit-scrollbar-track {
-            background: #f1f1f1; 
+        
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        textarea::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 5px;
-        }
-        textarea::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-        .toast {
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
+
+        .tool-btn {
+            @apply flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm border transform active:scale-95;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-100 min-h-screen flex flex-col font-sans text-slate-800">
 
-    <!-- Main Container -->
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden border border-gray-200">
-        
-        <!-- Header -->
-        <header class="bg-indigo-600 text-white p-5 flex justify-between items-center flex-wrap gap-4">
-            <h1 class="text-xl font-bold flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                المحرر الذكي: بحث واستبدال
-            </h1>
-            
-            <div class="flex gap-2">
-                <input type="file" id="fileInput" class="hidden" accept=".txt,.html,.css,.js,.json,.md">
-                <button onclick="document.getElementById('fileInput').click()" class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    رفع ملف
-                </button>
-                <button onclick="clearText()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    مسح
-                </button>
-            </div>
-        </header>
-
-        <!-- Main Content Area -->
-        <main class="p-5 flex flex-col gap-5">
-            
-            <!-- Toolbar: Copy/Paste -->
-            <div class="flex justify-end gap-2 mb-[-10px]">
-                <button onclick="pasteText()" class="text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 px-3 py-1 rounded text-sm transition flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    لصق
-                </button>
-                <button onclick="copyText()" class="text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 px-3 py-1 rounded text-sm transition flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    نسخ النص
-                </button>
-            </div>
-
-            <!-- Text Area -->
-            <div class="relative">
-                <textarea id="mainEditor" placeholder="أكتب النص هنا، أو قم برفع ملف..." class="w-full h-64 p-4 border-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition resize-none text-lg text-gray-700 leading-relaxed font-mono" spellcheck="false"></textarea>
-                <div id="statsBar" class="absolute bottom-4 left-4 text-xs text-gray-400 bg-white/80 px-2 py-1 rounded shadow-sm">
-                    الكلمات: 0 | الحروف: 0
+    <!-- Navbar -->
+    <nav class="bg-brand-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/10 p-2 rounded-lg">
+                        <i class="fa-solid fa-pen-nib text-brand-100 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg tracking-wide">TXT EDIT <span class="text-brand-100 font-light text-sm">Pro</span></h1>
+                        <p class="text-[10px] text-brand-200 opacity-80">By Mahmoud AboElfadl</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Operations Panel -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
                 
-                <!-- Search Section -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-semibold text-gray-700">بحث عن كلمة:</label>
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="الكلمة المراد البحث عنها..." class="w-full p-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div id="searchResult" class="text-sm text-indigo-600 font-medium h-5">
-                        <!-- Search stats will appear here -->
-                    </div>
-                </div>
-
-                <!-- Replace Section -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-semibold text-gray-700">استبدال بـ:</label>
-                    <input type="text" id="replaceInput" placeholder="الكلمة البديلة..." class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-300 focus:border-green-500 transition">
-                    
-                    <div class="flex gap-2">
-                        <button onclick="replaceOne()" class="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                            استبدال واحدة
-                        </button>
-                        <button onclick="replaceAll()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                            استبدال الكل
-                        </button>
-                    </div>
-                </div>
+                <!-- Upload Button (New Location - Green) -->
+                <button onclick="triggerFileUpload()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-emerald-900/30 transition flex items-center gap-2 transform hover:-translate-y-0.5 border border-emerald-500">
+                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                    <span class="hidden sm:inline">رفع ملف</span>
+                </button>
             </div>
+        </div>
+    </nav>
 
-            <!-- Export Section -->
-            <div class="border-t border-gray-200 pt-5 mt-2">
-                <h3 class="text-md font-bold text-gray-800 mb-3">تحميل الملف النهائي</h3>
-                <div class="flex flex-col md:flex-row gap-3 items-end">
-                    <div class="w-full md:w-1/2">
-                        <label class="block text-xs text-gray-500 mb-1">اسم الملف</label>
-                        <input type="text" id="fileName" value="new_document" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500" placeholder="اسم الملف">
-                    </div>
-                    <div class="w-full md:w-1/4">
-                        <label class="block text-xs text-gray-500 mb-1">النوع</label>
-                        <select id="fileType" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500">
-                            <option value="txt">ملف نصي (.txt)</option>
-                            <option value="html">صفحة ويب (.html)</option>
-                            <option value="css">ستايل (.css)</option>
-                            <option value="js">جافاسكربت (.js)</option>
-                            <option value="json">بيانات (.json)</option>
-                            <option value="md">ماركداون (.md)</option>
-                        </select>
-                    </div>
-                    <button onclick="downloadFile()" class="w-full md:w-1/4 bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-green-200 transition flex justify-center items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12" />
-                        </svg>
-                        تحميل
+    <!-- Main Workspace -->
+    <main class="flex-grow p-4 md:p-6 max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-6">
+
+        <!-- Left Column: Editor & Main Tools -->
+        <div class="flex-grow flex flex-col gap-4">
+            
+            <!-- Main Toolbar -->
+            <div class="glass-panel rounded-xl p-3 flex flex-col sm:flex-row gap-3 items-center justify-between sticky top-20 z-40">
+                
+                <!-- Text Tools (Copy/Paste/Clear) -->
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button onclick="copyContent()" class="tool-btn flex-1 bg-white hover:bg-slate-50 text-slate-700 border-slate-300 hover:border-brand-300 hover:text-brand-600" title="نسخ النص">
+                        <i class="fa-regular fa-copy"></i> نسخ
+                    </button>
+                    <button onclick="pasteContent()" class="tool-btn flex-1 bg-white hover:bg-slate-50 text-slate-700 border-slate-300 hover:border-brand-300 hover:text-brand-600" title="لصق النص">
+                        <i class="fa-regular fa-paste"></i> لصق
+                    </button>
+                    <button onclick="clearContent()" class="tool-btn bg-white hover:bg-red-50 text-red-600 border-slate-300 hover:border-red-300" title="مسح الكل">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                
+                <!-- Audio Tools -->
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button onclick="speakText()" class="tool-btn flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200">
+                        <i class="fa-solid fa-volume-high"></i> نطق
+                    </button>
+                    <button onclick="generateAudioLink()" class="tool-btn flex-1 bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200">
+                        <i class="fa-solid fa-file-audio"></i> MP3
                     </button>
                 </div>
             </div>
 
-        </main>
-        
-        <!-- Footer -->
-        <footer class="bg-gray-50 p-4 text-center text-gray-400 text-xs border-t">
-            تم التطوير بواسطة المساعد الذكي
-        </footer>
-    </div>
+            <!-- Editor Container -->
+            <div class="relative flex-grow bg-white rounded-xl shadow-md border border-slate-200 flex flex-col h-[600px]">
+                <!-- Stats Header -->
+                <div class="bg-slate-50 border-b px-4 py-2 flex justify-between items-center text-xs text-slate-500 font-mono rounded-t-xl">
+                    <span id="statsDisplay">الكلمات: 0 | الأحرف: 0</span>
+                    <button onclick="removeHighlights()" id="clearSearchBtn" class="hidden text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200 transition font-bold border border-yellow-200">
+                        <i class="fa-solid fa-eraser"></i> إزالة التمييز
+                    </button>
+                </div>
+                
+                <!-- Editable Content -->
+                <div id="richEditor" 
+                     contenteditable="true" 
+                     class="flex-grow p-6 text-lg leading-relaxed text-slate-800 font-mono focus:bg-slate-50 transition-colors"
+                     oninput="handleInput()"></div>
+                     
+                <div id="placeholder" class="absolute top-14 right-6 text-slate-400 pointer-events-none text-lg select-none">اكتب النص هنا أو قم برفع ملف...</div>
+            </div>
+
+            <!-- Audio Player (Hidden) -->
+            <div id="audioPlayerContainer" class="hidden glass-panel p-4 rounded-xl border-l-4 border-orange-500">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold text-sm text-slate-700">🎧 المشغل الصوتي:</h4>
+                    <button onclick="closeAudioPlayer()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <audio id="audioPlayer" controls class="w-full h-10"></audio>
+            </div>
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="w-full lg:w-80 flex flex-col gap-4">
+            
+            <!-- Search & Replace -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm border-b pb-2">
+                    <i class="fa-solid fa-magnifying-glass text-brand-600"></i> البحث والتمييز
+                </h3>
+                
+                <div class="space-y-3">
+                    <div class="relative">
+                        <input type="text" id="searchInput" class="w-full p-2.5 pl-8 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm transition" placeholder="ابحث لتمييز النص...">
+                        <button onclick="performSearch()" class="absolute left-2 top-2 text-slate-400 hover:text-brand-600">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                    </div>
+                    <p id="searchStats" class="text-xs text-brand-600 font-bold h-4"></p>
+
+                    <input type="text" id="replaceInput" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm transition" placeholder="استبدل بـ...">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="replaceNext()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold transition">استبدال واحد</button>
+                        <button onclick="replaceAll()" class="bg-brand-600 hover:bg-brand-700 text-white py-2 rounded-lg text-xs font-bold transition shadow-md">استبدال الكل</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Settings -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4 border-t-4 border-t-emerald-500">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm border-b pb-2">
+                    <i class="fa-solid fa-download text-emerald-600"></i> خيارات الحفظ
+                </h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1 block">اسم الملف</label>
+                        <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500">
+                            <input type="text" id="fileNameInput" value="MyDocument" class="w-full p-2 text-sm outline-none">
+                            <div class="bg-slate-100 px-2 py-2 text-xs text-slate-500 border-r border-slate-300 font-mono" id="fileExtDisplay">.txt</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1 block">الصيغة</label>
+                        <select id="fileTypeSelect" onchange="updateExtDisplay()" class="w-full p-2 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
+                            <option value="txt">TXT (نص عادي)</option>
+                            <option value="html">HTML (ويب)</option>
+                            <option value="css">CSS (تنسيق)</option>
+                            <option value="js">JS (برمجة)</option>
+                            <option value="json">JSON (بيانات)</option>
+                            <option value="md">Markdown</option>
+                        </select>
+                    </div>
+
+                    <button onclick="downloadFile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold shadow-lg shadow-emerald-100 transition flex justify-center items-center gap-2 mt-2">
+                        <i class="fa-solid fa-file-arrow-down"></i> حفظ الملف
+                    </button>
+                </div>
+            </div>
+
+            <!-- Developer Card (With Social Media) -->
+            <div class="bg-slate-900 rounded-xl p-5 text-center text-white shadow-xl mt-auto relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-brand-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition duration-700"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl border border-white/10">
+                        👨‍💻
+                    </div>
+                    <div class="flex items-center justify-center gap-2 mb-1">
+                        <i class="fa-solid fa-code text-brand-400"></i>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">تم التطوير بواسطة</span>
+                    </div>
+                    <p class="font-bold text-brand-300 text-lg mb-4">Mahmoud AboElfadl</p>
+                    
+                    <!-- Social Media Links -->
+                    <div class="flex justify-center gap-3">
+                        <a href="https://web.facebook.com/Mahmoud.AboElfadl.2016/" target="_blank" class="w-8 h-8 rounded bg-[#1877F2] flex items-center justify-center text-white hover:scale-110 transition shadow-lg" title="Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="https://t.me/Mahmoud.AboElfadl.2016" target="_blank" class="w-8 h-8 rounded bg-[#229ED9] flex items-center justify-center text-white hover:scale-110 transition shadow-lg" title="Telegram">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                        <a href="https://wa.me/201093650351" target="_blank" class="w-8 h-8 rounded bg-[#25D366] flex items-center justify-center text-white hover:scale-110 transition shadow-lg" title="WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="https://www.instagram.com/Mahmoud.AboElfadl.2016" target="_blank" class="w-8 h-8 rounded bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white hover:scale-110 transition shadow-lg" title="Instagram">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="text-[10px] text-slate-500 mt-4 border-t border-slate-800 pt-2">ABO-ELFADL PRO © 2024</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Hidden Input for File Upload -->
+    <input type="file" id="hiddenFileInput" class="hidden" onchange="handleFileUpload(this)">
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-50">
-        <span id="toastIcon">✨</span>
-        <span id="toastMessage">تمت العملية بنجاح</span>
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden flex items-center gap-3 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-2xl border border-slate-700 min-w-[300px]">
+        <span id="toastIcon" class="text-xl">🔔</span>
+        <span id="toastMsg" class="font-medium text-sm">إشعار</span>
     </div>
 
     <script>
         // DOM Elements
-        const editor = document.getElementById('mainEditor');
-        const fileInput = document.getElementById('fileInput');
+        const editor = document.getElementById('richEditor');
+        const placeholder = document.getElementById('placeholder');
+        const statsDisplay = document.getElementById('statsDisplay');
         const searchInput = document.getElementById('searchInput');
-        const replaceInput = document.getElementById('replaceInput');
-        const searchResult = document.getElementById('searchResult');
-        const statsBar = document.getElementById('statsBar');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
+        const fileExtDisplay = document.getElementById('fileExtDisplay');
 
-        // Update basic stats
-        editor.addEventListener('input', () => {
+        // --- Core Editor Logic ---
+        function handleInput() {
+            if (editor.innerText.trim().length > 0) {
+                placeholder.style.display = 'none';
+            } else {
+                placeholder.style.display = 'block';
+            }
             updateStats();
-            updateSearchCount();
-        });
-
-        function updateStats() {
-            const text = editor.value;
-            const charCount = text.length;
-            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-            statsBar.textContent = `الكلمات: ${wordCount} | الحروف: ${charCount}`;
         }
 
-        // Search Functionality
-        searchInput.addEventListener('input', updateSearchCount);
+        function updateStats() {
+            const text = editor.innerText;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const chars = text.length;
+            statsDisplay.innerText = `الكلمات: ${words} | الأحرف: ${chars}`;
+        }
 
-        function updateSearchCount() {
-            const text = editor.value;
+        function updateExtDisplay() {
+            const ext = document.getElementById('fileTypeSelect').value;
+            fileExtDisplay.innerText = '.' + ext;
+        }
+
+        // --- Search & Highlight Logic ---
+        function performSearch() {
+            removeHighlights();
             const term = searchInput.value;
-            
             if (!term) {
-                searchResult.textContent = '';
+                showToast('يرجى كتابة كلمة للبحث', 'error');
                 return;
             }
 
-            // Using RegExp to find all occurrences (Case insensitive for English parts)
-            try {
-                const regex = new RegExp(escapeRegExp(term), 'gi');
-                const matches = text.match(regex);
-                const count = matches ? matches.length : 0;
+            const content = editor.innerText;
+            const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+            
+            const matches = content.match(regex);
+            
+            if (matches && matches.length > 0) {
+                const highlighted = content.replace(regex, '<mark>$1</mark>');
+                editor.innerHTML = highlighted.replace(/\n/g, '<br>');
                 
-                if(count > 0) {
-                    searchResult.innerHTML = `<span class="text-green-600">تم العثور على الكلمة <b>${count}</b> مرة</span>`;
-                } else {
-                    searchResult.innerHTML = `<span class="text-red-500">الكلمة غير موجودة في النص</span>`;
-                }
-            } catch (e) {
-                searchResult.textContent = "صيغة بحث غير صالحة";
+                document.getElementById('searchStats').innerText = `تم تمييز ${matches.length} كلمة`;
+                document.getElementById('clearSearchBtn').classList.remove('hidden');
+                
+                showToast(`تم العثور على ${matches.length} تطابق`, 'success');
+            } else {
+                document.getElementById('searchStats').innerText = '0 نتائج';
+                showToast('لم يتم العثور على النص', 'error');
             }
+            
+            placeCaretAtEnd(editor);
+        }
+
+        function removeHighlights() {
+            const cleanText = editor.innerText;
+            editor.innerText = cleanText;
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            document.getElementById('searchStats').innerText = '';
+        }
+
+        function replaceAll() {
+            const term = searchInput.value;
+            const rep = document.getElementById('replaceInput').value;
+            if(!term) return showToast('ابحث عن الكلمة أولاً', 'error');
+
+            const content = editor.innerText;
+            const regex = new RegExp(escapeRegExp(term), 'gi');
+            
+            if(regex.test(content)){
+                editor.innerText = content.replace(regex, rep);
+                handleInput();
+                removeHighlights();
+                showToast('تم استبدال الكل بنجاح');
+            } else {
+                showToast('النص غير موجود', 'error');
+            }
+        }
+
+        function replaceNext() {
+            const term = searchInput.value;
+            const rep = document.getElementById('replaceInput').value;
+            if(!term) return showToast('ابحث عن الكلمة أولاً', 'error');
+            
+            const content = editor.innerText;
+            const regex = new RegExp(escapeRegExp(term), 'i');
+            
+            if(regex.test(content)){
+                editor.innerText = content.replace(regex, rep);
+                handleInput();
+                removeHighlights();
+                showToast('تم استبدال كلمة واحدة');
+            } else {
+                showToast('النص غير موجود', 'error');
+            }
+        }
+
+        // --- File Operations ---
+        function triggerFileUpload() {
+            document.getElementById('hiddenFileInput').click();
+        }
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editor.innerText = e.target.result;
+                handleInput();
+                showToast('تم رفع الملف بنجاح');
+                
+                const name = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                document.getElementById('fileNameInput').value = name;
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function downloadFile() {
+            const content = editor.innerText;
+            if (!content.trim()) return showToast('لا يوجد محتوى للحفظ!', 'error');
+
+            const name = document.getElementById('fileNameInput').value || 'document';
+            const type = document.getElementById('fileTypeSelect').value;
+            const filename = `${name}.${type}`;
+
+            const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`تم حفظ الملف: ${filename}`);
+        }
+
+        // --- Audio Functions ---
+        function speakText() {
+            const text = editor.innerText;
+            if (!text.trim()) return showToast('اكتب نصاً للنطق', 'error');
+            
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const isEnglish = /^[a-zA-Z\s\.,?!0-9]+$/.test(text.substring(0, 50));
+            utterance.lang = isEnglish ? 'en-US' : 'ar-SA';
+            
+            utterance.onstart = () => showToast('جاري القراءة...', 'info');
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function generateAudioLink() {
+            const text = editor.innerText.trim();
+            if (!text) return showToast('اكتب نصاً أولاً', 'error');
+
+            const container = document.getElementById('audioPlayerContainer');
+            const player = document.getElementById('audioPlayer');
+            
+            container.classList.remove('hidden');
+            
+            const lang = /^[a-zA-Z\s]+$/.test(text.substring(0, 20)) ? 'en' : 'ar';
+            const encodedText = encodeURIComponent(text);
+            
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
+            
+            player.src = url;
+            player.play().catch(e => console.log('Autoplay blocked'));
+            
+            showToast('تم تجهيز الملف الصوتي', 'success');
+        }
+
+        function closeAudioPlayer() {
+            document.getElementById('audioPlayerContainer').classList.add('hidden');
+            document.getElementById('audioPlayer').pause();
+        }
+
+        // --- Clipboard ---
+        async function copyContent() {
+            try {
+                await navigator.clipboard.writeText(editor.innerText);
+                showToast('تم نسخ النص');
+            } catch(e) { showToast('خطأ في النسخ', 'error'); }
+        }
+
+        async function pasteContent() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.execCommand("insertText", false, text);
+                handleInput();
+                showToast('تم اللصق');
+            } catch(e) { showToast('يرجى استخدام Ctrl+V', 'error'); }
+        }
+
+        function clearContent() {
+            if(editor.innerText.trim() === '') return;
+            if(confirm('هل أنت متأكد من مسح كل شيء؟')) {
+                editor.innerText = '';
+                handleInput();
+                removeHighlights();
+                showToast('تم تنظيف المحرر', 'info');
+            }
+        }
+
+        // --- Utilities ---
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const txt = document.getElementById('toastMsg');
+            
+            txt.innerText = msg;
+            
+            if (type === 'error') {
+                icon.innerText = '⚠️';
+                toast.classList.replace('bg-slate-800', 'bg-red-600');
+            } else if (type === 'info') {
+                icon.innerText = 'ℹ️';
+                toast.classList.replace('bg-red-600', 'bg-blue-600');
+            } else {
+                icon.innerText = '✅';
+                toast.classList.remove('bg-red-600', 'bg-blue-600');
+                toast.classList.add('bg-slate-800');
+            }
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        // Replace Functions
-        function replaceOne() {
-            const term = searchInput.value;
-            const replacement = replaceInput.value;
-            
-            if (!term) {
-                showToast('يرجى كتابة كلمة للبحث عنها أولاً', 'error');
-                return;
-            }
-
-            if (editor.value.toLowerCase().includes(term.toLowerCase())) {
-                // Replace only the first occurrence (case insensitive simulation)
-                const regex = new RegExp(escapeRegExp(term), 'i'); 
-                editor.value = editor.value.replace(regex, replacement);
-                updateSearchCount();
-                updateStats();
-                showToast('تم استبدال الكلمة الأولى بنجاح');
-            } else {
-                showToast('الكلمة غير موجودة للاستبدال', 'error');
+        function placeCaretAtEnd(el) {
+            el.focus();
+            if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
             }
         }
 
-        function replaceAll() {
-            const term = searchInput.value;
-            const replacement = replaceInput.value;
-            
-            if (!term) {
-                showToast('يرجى كتابة كلمة للبحث عنها أولاً', 'error');
-                return;
-            }
-
-            const regex = new RegExp(escapeRegExp(term), 'gi');
-            const matches = editor.value.match(regex);
-            
-            if (matches && matches.length > 0) {
-                editor.value = editor.value.replace(regex, replacement);
-                updateSearchCount();
-                updateStats();
-                showToast(`تم استبدال ${matches.length} كلمة بنجاح`);
-            } else {
-                showToast('الكلمة غير موجودة للاستبدال', 'error');
-            }
-        }
-
-        // File Handling
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                editor.value = e.target.result;
-                updateStats();
-                showToast(`تم تحميل الملف: ${file.name}`);
-                
-                // Try to set filename input based on uploaded file
-                const nameWithoutExt = file.name.split('.').slice(0, -1).join('.');
-                if(nameWithoutExt) document.getElementById('fileName').value = nameWithoutExt;
-            };
-            reader.onerror = () => showToast('حدث خطأ أثناء قراءة الملف', 'error');
-            reader.readAsText(file, 'UTF-8');
-            
-            // Reset input so same file can be selected again if needed
-            fileInput.value = '';
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            document.execCommand('insertText', false, text);
         });
 
-        // Download Functionality
-        function downloadFile() {
-            const content = editor.value;
-            if (!content) {
-                showToast('المحرر فارغ، لا يوجد شيء لتحميله!', 'error');
-                return;
-            }
-
-            const fileName = document.getElementById('fileName').value || 'document';
-            const fileType = document.getElementById('fileType').value;
-            const fullFileName = `${fileName}.${fileType}`;
-
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fullFileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showToast('جاري تحميل الملف...');
-        }
-
-        // Clipboard Operations
-        async function copyText() {
-            if (!editor.value) return;
-            try {
-                await navigator.clipboard.writeText(editor.value);
-                showToast('تم نسخ النص إلى الحافظة');
-            } catch (err) {
-                // Fallback
-                editor.select();
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges();
-                showToast('تم نسخ النص');
-            }
-        }
-
-        async function pasteText() {
-            try {
-                const text = await navigator.clipboard.readText();
-                editor.setRangeText(text, editor.selectionStart, editor.selectionEnd, 'end');
-                updateStats();
-                updateSearchCount();
-                showToast('تم لصق النص');
-            } catch (err) {
-                showToast('يرجى استخدام Ctrl+V للصق (بسبب إعدادات المتصفح)', 'error');
-            }
-        }
-
-        function clearText() {
-            if(confirm('هل أنت متأكد من مسح كل النص؟')) {
-                editor.value = '';
-                updateStats();
-                updateSearchCount();
-                searchInput.value = '';
-                replaceInput.value = '';
-                searchResult.innerHTML = '';
-            }
-        }
-
-        // Toast Notification System
-        let toastTimeout;
-        function showToast(message, type = 'success') {
-            toastMessage.textContent = message;
-            const icon = document.getElementById('toastIcon');
-            
-            if (type === 'error') {
-                icon.textContent = '⚠️';
-                document.getElementById('toast').classList.replace('bg-gray-800', 'bg-red-600');
-            } else {
-                icon.textContent = '✨';
-                document.getElementById('toast').classList.replace('bg-red-600', 'bg-gray-800');
-            }
-
-            toast.classList.add('show');
-            
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Initial Stats
-        updateStats();
     </script>
 </body>
 </html>
-
